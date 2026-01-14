@@ -1,0 +1,51 @@
+name: Multi-environment Infra Deployment
+
+on: 
+  workflow_dispatch: 
+    inputs:
+      choice:
+        type: choice
+        description: Terraform operations
+        options:
+        - plan
+        - apply
+        - destroy
+
+jobs: 
+  deploy-to-development: 
+    uses: ./.github/workflows/deploy-template.yml
+    secrets: inherit
+    with: 
+      environment: "dev" 
+      resource-group: ${{ vars.RESOURCE_GROUP }}
+      storage-account: ${{ vars.DEV_STORAGE_ACCOUNT }}
+      container: ${{ vars.DEV_CONTAINER }} 
+      var-file: ${{ vars.DEV_VAR_FILE }}
+      workingdirectory: "./main"
+      choice: "${{ github.event.inputs.choice }}"
+
+  # deploy-to-test: 
+  #   uses: ./.github/workflows/deploy-template.yml
+  #   secrets: inherit
+  #   # needs: [deploy-to-development]
+  #   with: 
+  #     environment: "test" 
+  #     resource-group: ${{ vars.RESOURCE_GROUP }}
+  #     storage-account: ${{ vars.TEST_STORAGE_ACCOUNT }}
+  #     container: ${{ vars.TEST_CONTAINER }} 
+  #     var-file: ${{ vars.TEST_VAR_FILE }}
+  #     workingdirectory: "./IaC_Scripts"
+  #     choice: "${{ github.event.inputs.choice }}"
+
+  # deploy-to-stage: 
+  #   uses: ./.github/workflows/deploy-template.yml
+  #   secrets: inherit
+  #   needs: [deploy-to-test]
+  #   with: 
+  #     environment: "stage" 
+  #     resource-group: ${{ vars.RESOURCE_GROUP }}
+  #     storage-account: ${{ vars.STAGE_STORAGE_ACCOUNT }}
+  #     container: ${{ vars.STAGE_CONTAINER }} 
+  #     var-file: ${{ vars.STAGE_VAR_FILE }}
+  #     workingdirectory: "./IaC_Scripts"
+  #    choice: "${{ github.event.inputs.choice }}"

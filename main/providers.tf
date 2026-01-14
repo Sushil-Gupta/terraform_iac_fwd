@@ -15,6 +15,12 @@ terraform {
     }
   }
 
+  # Backend configuration for remote state storage in Azure
+  # Values are provided via -backend-config flags in GitHub Actions
+  backend "azurerm" {
+    
+  }
+
 }
 
 provider "azurerm" {

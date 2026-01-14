@@ -1,0 +1,117 @@
+name: Template for Infra Deployment
+
+on: 
+  workflow_call: 
+    inputs: 
+      choice: 
+        description: "Terraform Operation"
+        type: string
+        required: true 
+        default: "plan" 
+      environment: 
+        description: "The target environment"
+        type: string
+        required: true 
+        default: "env" 
+      resource-group: 
+        description: "The resource group where the backend state will be created."
+        type: string
+        required: true 
+        default: "rg-backend-state-cmf"
+      storage-account: 
+        description: "The storage account where the backend state will be created."
+        type: string
+        required: true 
+        default: "sabackendstatecmf" 
+      container: 
+        description: "The container where the backend state will be created."
+        type: string
+        required: true 
+        default: "tfstate-env-cmf"
+      var-file: 
+        description: "the variable file for the current environment."
+        type: string
+        required: true 
+        default: "terraform.tfvars"
+      workingdirectory: 
+        description: "the variable file for the current workingdirectory."
+        type: string
+        required: true 
+        default: "./IaC_Scripts"
+
+jobs: 
+  template-job: 
+    runs-on: 'ubuntu-latest' 
+
+    steps: 
+      # Step 1: Checkout your repository 
+      - name: Checkout Repository 
+        uses: actions/checkout@v3
+
+      # Step 2: Azure Login
+      - name: Azure Login
+        uses: azure/login@v2 
+        with: 
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          # creds: '{"clientId":"${{ inputs.clientid }}","clientSecret":"${{ secrets.clientsecret }}","subscriptionId":"${{ inputs.subscriptionid }}","tenantId":"${{ inputs.tenantid }}"}'
+
+      # Step 3: Setup Terraform 
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v2 
+        #with: 
+          #terraform-version: latest
+
+      # Step 3: Verify Terraform installation 
+      - name: Verify Terraform
+        run: terraform --version 
+
+      # Step 4: Initialize Terraform 
+      - name: Terraform Init 
+        working-directory: ${{ inputs.workingdirectory }}
+        run: terraform init -backend-config="resource_group_name=${{ inputs.resource-group }}"
+                             -backend-config="storage_account_name=${{ inputs.storage-account }}"
+                             -backend-config="container_name=${{ inputs.container }}"
+                             -backend-config="key=${{ inputs.environment }}-hw.terraform.tfstate" -upgrade
+
+      # Step 5: Validate Terraform Configuration 
+      - name: Terraform Validate 
+        working-directory: ${{ inputs.workingdirectory }}
+        run: terraform validate 
+
+      # Step 6: Create Terraform Plan  
+      - name: Terraform Plan 
+        working-directory: ${{ inputs.workingdirectory }}
+        run: terraform plan -out=${{ inputs.environment }}.tfplan -var-file=../env/${{ inputs.var-file }}
+        if: "${{ inputs.choice == 'plan' || inputs.choice == 'apply' }}"
+
+      #- name: Terraform Refresh 
+      #  working-directory: ${{ inputs.workingdirectory }}
+      #  run: terraform refresh 
+
+      # Step 7: Apply Terraform Configuration 
+      - name: Terraform Apply 
+        working-directory: ${{ inputs.workingdirectory }}
+        run: terraform apply -auto-approve ${{ inputs.environment }}.tfplan 
+        if: "${{ inputs.choice == 'apply' }}"
+
+      #- name: Capture Terraform Outputs
+      #  run: |
+      #    APIM_NAME=$(terraform output -raw apim_name 2>/dev/null || echo "")
+      #    RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name 2>/dev/null || echo "")
+      #  if: "${{ inputs.choice == 'apply' }}"
+
+      #- name: Change the APIM public access to false
+      #  run: az apim update --name $APIM_NAME --resource-group $RESOURCE_GROUP_NAME --public-network-access false 
+      #  if: "${{ inputs.choice == 'apply' }}"
+       
+      # Step 8: Destroy Terraform Plan  
+      - name: Terraform Plan Destroy
+        working-directory: ${{ inputs.workingdirectory }}
+        run: terraform plan -destroy -out=${{ inputs.environment }}.tfplan -var-file=../env/${{ inputs.var-file }}
+        if: "${{ inputs.choice == 'destroy' }}"
+
+       # Step 9: Destroy Terraform Configuration 
+      - name: Terraform Destroy 
+        working-directory: ${{ inputs.workingdirectory }}
+        run: terraform apply -destroy --auto-approve ${{ inputs.environment }}.tfplan 
+        if: "${{ inputs.choice == 'destroy' }}"
