@@ -68,10 +68,14 @@ jobs:
       # Step 4: Initialize Terraform 
       - name: Terraform Init 
         working-directory: ${{ inputs.workingdirectory }}
-        run: terraform init -backend-config="resource_group_name=${{ inputs.resource-group }}"
-                             -backend-config="storage_account_name=${{ inputs.storage-account }}"
-                             -backend-config="container_name=${{ inputs.container }}"
-                             -backend-config="key=${{ inputs.environment }}-hw.terraform.tfstate" -upgrade
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ inputs.resource-group }}" \
+            -backend-config="storage_account_name=${{ inputs.storage-account }}" \
+            -backend-config="container_name=${{ inputs.container }}" \
+            -backend-config="key=${{ inputs.environment }}-hw.terraform.tfstate" \
+            -backend-config="use_azuread_auth=true" \
+            -upgrade
 
       # Step 5: Validate Terraform Configuration 
       - name: Terraform Validate 
