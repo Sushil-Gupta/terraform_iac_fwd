@@ -119,16 +119,16 @@ module "private_dns" {
   }
   timeouts = {
     dns_zones = try(each.value.timeouts.dns_zones, {
-      create = "120s"
-      delete = "120s"
-      update = "120s"
-      read   = "120s"
+      create = "30m"
+      delete = "30m"
+      update = "30m"
+      read   = "5m"
     })
     vnet_links = try(each.value.timeouts.vnet_links, {
-      create = "120s"
-      delete = "120s"
-      update = "120s"
-      read   = "120s"
+      create = "30m"
+      delete = "30m"
+      update = "30m"
+      read   = "5m"
     })
   }
   parent_id = azurerm_resource_group.spoke_rg.id
