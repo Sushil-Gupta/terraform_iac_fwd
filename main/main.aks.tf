@@ -55,7 +55,7 @@ module "avm-res-containerservice-managedcluster" {
   private_cluster_enabled            = var.azure_kubernetes_service.private_cluster_enabled
   private_dns_zone_id                 = module.private_dns[var.azure_kubernetes_service.private_dns_zone_key].resource_id  
   role_assignments                   = var.azure_kubernetes_service.role_assignments
-  disk_encryption_set_id             = data.azurerm_disk_encryption_set.aks_des.id # Reference the DES created earlier
+  disk_encryption_set_id             = azurerm_disk_encryption_set.aks_des.id  # SANDBOX: Use resource | CUSTOMER: Change to data.azurerm_disk_encryption_set.aks_des.id
   tags                              = merge(var.tags, var.azure_kubernetes_service.tags)
   default_node_pool = {
     name                 = var.azure_kubernetes_service.default_node_pool.name
@@ -118,6 +118,7 @@ module "avm-res-containerservice-managedcluster" {
   private_endpoints_manage_dns_zone_group = var.azure_kubernetes_service.private_endpoints_manage_dns_zone_group
   depends_on = [
     azurerm_role_assignment.role-assignment-dnszone,
-    data.azurerm_disk_encryption_set.aks_des
+    azurerm_disk_encryption_set.aks_des,
+    azurerm_key_vault_access_policy.des_policy
   ]
 }
