@@ -41,33 +41,36 @@ resource "azurerm_key_vault" "kv" {
   # Enable Azure services to access the vault
   enabled_for_disk_encryption = true
 
-  # Add access policy for current user/service principal running Terraform
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "Get",
-      "List",
-      "Create",
-      "Delete",
-      "Update",
-      "Recover",
-      "Purge",
-      "GetRotationPolicy",
-      "SetRotationPolicy"
-    ]
-
-    secret_permissions = [
-      "Get",
-      "List",
-      "Set",
-      "Delete"
-    ]
-  }
-
   tags = var.tags
   depends_on = [azurerm_resource_group.spoke_rg]
+}
+
+# Add access policy for SPN/user running Terraform (separate resource for proper timing)
+resource "azurerm_key_vault_access_policy" "terraform_spn" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  key_permissions = [
+    "Get",
+    "List",
+    "Create",
+    "Delete",
+    "Update",
+    "Recover",
+    "Purge",
+    "GetRotationPolicy",
+    "SetRotationPolicy"
+  ]
+
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete"
+  ]
+
+  depends_on = [azurerm_key_vault.kv]
 }
 
 # Create encryption key in Key Vault
@@ -87,7 +90,10 @@ resource "azurerm_key_vault_key" "disk_encryption_key" {
   ]
 
   tags = var.tags
-  depends_on = [azurerm_key_vault.kv]
+  depends_on = [
+    azurerm_key_vault.kv,
+    azurerm_key_vault_access_policy.terraform_spn  # Wait for SPN access policy to be applied
+  ]
 }
 
 # Create Disk Encryption Set
