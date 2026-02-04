@@ -362,31 +362,17 @@ azure_kubernetes_service = {
       admin_group_object_ids = []
     }
 }
-# For Existing Key Vault 
+# Key Vault for Disk Encryption (Customer will create this in Azure Portal)
+# Update these values after creating the Key Vault in Azure Portal
 key_vault = {
-  name                = "temp-kv-placeholder"
-  resource_group_name = "temp-rg-placeholder"
+  name                = "kv-fwd-qa-diskenc"  # Update with actual Key Vault name
+  resource_group_name = "rg-fwd-qa"           # Same as spoke RG
 }
 
-# OLD CONFIGURATION (commented out - for creating new Key Vault)
-# key_vault = {
-#     name = "akv-fwd-fru4u5ccyuarq-qa"
-#     sku_name = "standard"
-#     tags = {}
-#     network_acls = {
-#       bypass                     = "None"
-#       default_action             = "Deny"
-#       ip_rules                   = []
-#     }
-#     private_endpoints = {
-#       "akv-dev-pe" = {
-#         subnet_key         = "private-endpoint"
-#         privatednszone_key = "keyvault"
-#         subresource_name   = "vault"
-#       }
-#     }
-#     role_assignments = {}
-# }
+# Key name in Key Vault for Disk Encryption
+disk_encryption_key_name = "aks-disk-encryption-key" # Update with actual Key name
+
+
 container_registry = {
   name = "fwdcontainerregistryqa"
   resource_group_name = "rg-fwd-qa"

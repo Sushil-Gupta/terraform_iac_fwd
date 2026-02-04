@@ -1,3 +1,32 @@
+# ============================================================================
+# NETWORKING CONFIGURATION - SANDBOX vs CUSTOMER DEPLOYMENT
+# ============================================================================
+# 
+# CURRENT MODE: SANDBOX TESTING
+# 
+# This file supports TWO deployment modes:
+# 
+# 1. SANDBOX TESTING (CURRENT):
+#    - Creates NEW Resource Group and VNet
+#    - Use this for local testing before customer deployment
+#    - Active resources: azurerm_resource_group.spoke_rg, azurerm_virtual_network.spoke_vnet
+# 
+# 2. CUSTOMER DEPLOYMENT:
+#    - Uses EXISTING Resource Group and VNet (customer already has these)
+#    - Only creates: subnets, NSGs, route tables, and other resources
+#    - Active data sources: data.azurerm_resource_group.spoke_rg, data.azurerm_virtual_network.spoke_vnet
+# 
+# TO SWITCH FROM SANDBOX TO CUSTOMER DEPLOYMENT:
+# Step 1: Comment out the "SANDBOX TESTING CONFIGURATION" resource blocks (lines ~40-60)
+# Step 2: Uncomment the "CUSTOMER DEPLOYMENT CONFIGURATION" data source blocks (lines ~25-32)
+# Step 3: Update Private DNS Zone vnetid reference (line ~130): change to data.azurerm_virtual_network.spoke_vnet.id
+# 
+# ============================================================================
+
+# ============================================================================
+# SANDBOX TESTING CONFIGURATION (ACTIVE)
+# Creates new Resource Group and VNet for testing in sandbox environment
+# ============================================================================
 resource "azurerm_resource_group" "spoke_rg" {
   name     = var.spoke_resource_group_name
   location = var.location
@@ -10,6 +39,24 @@ resource "azurerm_resource_group" "spoke_rg" {
 #   resource_group_name = var.hub_vnet.resource_group_name
 # }
 
+# ============================================================================
+# CUSTOMER DEPLOYMENT CONFIGURATION (COMMENTED OUT FOR SANDBOX TESTING)
+# For customer: Uncomment the data sources below and comment out the resource blocks
+# Customer has existing RG and VNet - we only reference them, not create them
+# ============================================================================
+# data "azurerm_resource_group" "spoke_rg" {
+#   name = var.spoke_resource_group_name
+# }
+#
+# data "azurerm_virtual_network" "spoke_vnet" {
+#   name                = var.spoke_vnet.name
+#   resource_group_name = var.spoke_resource_group_name
+# }
+
+# ============================================================================
+# SANDBOX TESTING CONFIGURATION (ACTIVE)
+# Creates new VNet for testing - comment out for customer deployment
+# ============================================================================
 resource "azurerm_virtual_network" "spoke_vnet" {
   name                = var.spoke_vnet.name
   resource_group_name = var.spoke_resource_group_name
@@ -105,7 +152,7 @@ module "private_dns" {
   virtual_network_links = {
       vnet-link-spoke = {
         vnetlinkname     = "vnet-link-spoke-${var.environment}-${var.app_name}${var.instance}"
-        vnetid           = azurerm_virtual_network.spoke_vnet.id
+        vnetid           = azurerm_virtual_network.spoke_vnet.id  # SANDBOX: Use resource | CUSTOMER: Change to data.azurerm_virtual_network.spoke_vnet.id
         autoregistration = each.value.autoregistration
         tags             = var.tags
       }
