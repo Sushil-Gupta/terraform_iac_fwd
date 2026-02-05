@@ -17,7 +17,7 @@ resource "azurerm_role_assignment" "role-assignment-reader-agic" {
 }
 
 resource "azurerm_role_assignment" "role-assignment-contributor-uami" {
-  scope                = module.application_gateway[var.azure_kubernetes_service.ingress_application_gateway.gateway_key].resource_id
+  scope                = module.application_gateway.resource_id
   role_definition_name = "Contributor"
   principal_id         =  module.managed_identity.principal_id
     depends_on           = [module.managed_identity, module.application_gateway]  
@@ -79,7 +79,7 @@ module "avm-res-containerservice-managedcluster" {
             }
   } 
   ingress_application_gateway = {
-      gateway_id   = module.application_gateway[var.azure_kubernetes_service.ingress_application_gateway.gateway_key].resource_id
+      gateway_id   = module.application_gateway.resource_id
      # gateway_name = "aks-appgw-ingress"
   }
   network_profile = var.azure_kubernetes_service.network_profile
