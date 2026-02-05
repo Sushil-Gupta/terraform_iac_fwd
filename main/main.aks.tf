@@ -5,7 +5,7 @@ resource "azurerm_role_assignment" "role-assignment-dnszone" {
 }
 
 resource "azurerm_role_assignment" "role-assignment-contributor-agic" {
-  scope                = module.application_gateway[var.azure_kubernetes_service.ingress_application_gateway.gateway_key].resource_id
+  scope                = module.application_gateway.resource_id
   role_definition_name = "Contributor"
   principal_id         =   module.avm-res-containerservice-managedcluster.ingress_app_object_id
 }
