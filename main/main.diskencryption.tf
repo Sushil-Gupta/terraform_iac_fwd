@@ -41,11 +41,19 @@ resource "azurerm_key_vault" "kv" {
   # Enable Azure services to access the vault
   enabled_for_disk_encryption = true
 
+  # Network ACLs to allow trusted Azure services
+  network_acls {
+    default_action = "Deny"
+    bypass         = "AzureServices"  # Allow trusted Microsoft services
+  }
+
   tags = var.tags
   depends_on = [azurerm_resource_group.spoke_rg]
 }
 
 # Add access policy for SPN/user running Terraform (separate resource for proper timing)
+# This grants permissions to whoever is running terraform:
+# Uses dynamic object_id so no hardcoded values - works for any deployment!
 resource "azurerm_key_vault_access_policy" "terraform_spn" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -68,6 +76,15 @@ resource "azurerm_key_vault_access_policy" "terraform_spn" {
     "List",
     "Set",
     "Delete"
+  ]
+
+  certificate_permissions = [
+    "Get",
+    "List",
+    "Create",
+    "Delete",
+    "Update",
+    "Import"
   ]
 
   depends_on = [azurerm_key_vault.kv]
@@ -124,6 +141,25 @@ resource "azurerm_key_vault_access_policy" "des_policy" {
   ]
 
   depends_on = [azurerm_disk_encryption_set.aks_des]
+}
+
+# Grant Managed Identity access to Key Vault for Application Gateway SSL certificates
+resource "azurerm_key_vault_access_policy" "appgw_managed_identity" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = module.managed_identity.principal_id
+
+  certificate_permissions = [
+    "Get",
+    "List"
+  ]
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
+
+  depends_on = [module.managed_identity, azurerm_key_vault.kv]
 }
 
 # ============================================================================
