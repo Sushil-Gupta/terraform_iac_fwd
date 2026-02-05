@@ -167,15 +167,14 @@ app_gateways = {
       }
     }
     # SSL Certificate Configuration - Using Key Vault
+    # Note: Key Vault name and resource group come from top-level key_vault variable
     ssl_certificates = {
       "appgw-ssl-cert" = {
         name              = "appgw-ssl-cert"
         file_path         = null
         password          = null
         key_vault_details = {
-          resource_group_name = "rg-fwd-qa"
-          key_vault_name      = "kv-fwd-qa-diskenc"
-          cert_name           = "appgw-test-certificate"
+          cert_name           = "appgw-test-certificate"  # Only certificate name needed
         }
       }
     }
@@ -203,7 +202,7 @@ app_gateways = {
       priority                   = 100
     #   rewrite_rule_set_name      = "my-rewrite-rule-set"
     }
-        rule-https = {
+      rule-https = {
       name                       = "rule-https"
       rule_type                  = "Basic"
       http_listener_name         = "listener-https"

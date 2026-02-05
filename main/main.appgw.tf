@@ -38,14 +38,16 @@ data "azurerm_key_vault" "sslkv" {
  
   for_each            = { for cert in var.app_gateways.ssl_certificates : cert.name => cert if(cert.key_vault_details != null)}
  
-  name                = var.app_gateways.key_vault_details.key_vault_name
-  resource_group_name = var.app_gateways.key_vault_details.resource_group_name
+  # Use the top-level key_vault variable for Key Vault name and resource group
+  name                = var.key_vault.name
+  resource_group_name = var.key_vault.resource_group_name
 }
  
 data "azurerm_key_vault_certificate" "sslkv_cert" {
   for_each            = { for cert in var.app_gateways.ssl_certificates : cert.name => cert if(cert.key_vault_details != null)}
  
-  name         = var.app_gateways.key_vault_details.cert_name
+  # Certificate name still comes from each certificate's configuration
+  name         = each.value.key_vault_details.cert_name
   key_vault_id = data.azurerm_key_vault.sslkv[each.key].id
 }
 

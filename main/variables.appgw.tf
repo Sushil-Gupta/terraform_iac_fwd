@@ -83,9 +83,7 @@ variable "app_gateways" {
     file_path                = optional(string,null)
     password            = optional(string)
     key_vault_details = optional(object({
-      resource_group_name = string
-      key_vault_name = string
-      cert_name  = string
+    cert_name  = string  # Only certificate name - Key Vault info comes from var.key_vault
     }),null)
     })),null)
     request_routing_rules = optional(map(object({
