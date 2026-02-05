@@ -1,7 +1,7 @@
 ## APP Gateway variables
 variable "app_gateways" {
   description = "Configuration for Azure Application Gateway"
-  type = map(object({    
+  type = object({    
     name = string
     sku = object({
       name     = string
@@ -85,7 +85,7 @@ variable "app_gateways" {
     key_vault_details = optional(object({
       resource_group_name = string
       key_vault_name = string
-      secret_name  = string
+      cert_name  = string
     }),null)
     })),null)
     request_routing_rules = optional(map(object({
@@ -142,7 +142,7 @@ variable "app_gateways" {
     log_categories    = optional(list(string), ["allLogs"])
     log_groups        = optional(list(string), [])
     metric_categories = optional(list(string), [])
-  }))
+  })
 }
 
 # variable "app_gateway_pips" {

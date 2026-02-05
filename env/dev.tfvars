@@ -148,7 +148,6 @@ nsg = {
 # }
 
 app_gateways = {
-  "A" ={
     name                = "GAC-FWAF-01-FWB-A"
     tags = {}
     frontend_ip_key    = "A"
@@ -167,7 +166,19 @@ app_gateways = {
         name = "aks-pool"
       }
     }
-    # ssl_certificates = []
+    # SSL Certificate Configuration - Using Key Vault
+    ssl_certificates = {
+      "appgw-ssl-cert" = {
+        name              = "appgw-ssl-cert"
+        file_path         = null
+        password          = null
+        key_vault_details = {
+          resource_group_name = "rg-fwd-qa"
+          key_vault_name      = "kv-fwd-qa-diskenc"
+          cert_name           = "appgw-test-certificate"
+        }
+      }
+    }
     gateway_ip_configuration = {
       name      = "GAC-FWAF-01-FWB-A-gwip"
       subnet_key = "appgw"
@@ -192,19 +203,38 @@ app_gateways = {
       priority                   = 100
     #   rewrite_rule_set_name      = "my-rewrite-rule-set"
     }
+        rule-https = {
+      name                       = "rule-https"
+      rule_type                  = "Basic"
+      http_listener_name         = "listener-https"
+      backend_address_pool_name  = "aks-pool"
+      backend_http_settings_name = "setting1"
+      priority                   = 101
+    }
     }
     frontend_ports = {
       "port01" = {
         name = "port01"
         port = 80
       }
+      "port443" = {
+        name = "port443"
+        port = 443
+      }
     }
     http_listeners = {
       "listener1" = {
         name                           = "listener1"
         frontend_ip_configuration_name = "GAC-FWAF-01-FWB-A-feip"
-        host_name          = null
+        host_name                      = null
         frontend_port_name             = "port01"
+      }
+      "listener-https" = {
+        name                           = "listener-https"
+        frontend_ip_configuration_name = "GAC-FWAF-01-FWB-A-feip"
+        host_name                      = null
+        frontend_port_name             = "port443"
+        ssl_certificate_name           = "appgw-ssl-cert"
       }
     }
     waf_configuration = {
@@ -229,8 +259,7 @@ app_gateways = {
       }
       
     }
-    zones = ["1", "2", "3"]
-  }  
+    zones = ["1", "2", "3"] 
 }
 
 app_gateway_policy = {
