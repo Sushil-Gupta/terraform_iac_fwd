@@ -148,10 +148,10 @@ nsg = {
 # }
 
 app_gateways = {
-    name                = "GAC-FWAF-01-FWB-A"
+    name                = "fwd-appgw-qa"
     tags = {}
     frontend_ip_key    = "A"
-    frontend_ip_configuration_name  = "GAC-FWAF-01-FWB-A-feip"
+    frontend_ip_configuration_name  = "fwd-appgw-qa-feip"
     sku = {
       name     = "WAF_v2"
       tier     = "WAF_v2"
