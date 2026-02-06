@@ -179,7 +179,7 @@ app_gateways = {
     #   }
     # }
     gateway_ip_configuration = {
-      name      = "GAC-FWAF-01-FWB-A-gwip"
+      name      = "fwd-appgw-qa-gwip"
       subnet_key = "appgw"
     }
     backend_http_settings = {
@@ -224,13 +224,13 @@ app_gateways = {
     http_listeners = {
       "listener1" = {
         name                           = "listener1"
-        frontend_ip_configuration_name = "GAC-FWAF-01-FWB-A-feip"
+        frontend_ip_configuration_name = "fwd-appgw-qa-feip"
         host_name                      = null
         frontend_port_name             = "port01"
       }
       # "listener-https" = {
       #   name                           = "listener-https"
-      #   frontend_ip_configuration_name = "GAC-FWAF-01-FWB-A-feip"
+      #   frontend_ip_configuration_name = "fwd-appgw-qa-feip"
       #   host_name                      = null
       #   frontend_port_name             = "port443"
       #   ssl_certificate_name           = "appgw-ssl-cert"
