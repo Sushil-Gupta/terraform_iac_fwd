@@ -43,7 +43,7 @@ resource "azurerm_key_vault" "kv" {
 
   # Network ACLs to allow trusted Azure services
   network_acls {
-    default_action = "Deny"
+    default_action = "Allow"
     bypass         = "AzureServices"  # Allow trusted Microsoft services
   }
 

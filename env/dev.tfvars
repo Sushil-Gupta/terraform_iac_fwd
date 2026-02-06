@@ -168,16 +168,16 @@ app_gateways = {
     }
     # SSL Certificate Configuration - Using Key Vault
     # Note: Key Vault name and resource group come from top-level key_vault variable
-    ssl_certificates = {
-      "appgw-ssl-cert" = {
-        name              = "appgw-ssl-cert"
-        file_path         = null
-        password          = null
-        key_vault_details = {
-          cert_name           = "appgw-test-certificate"  # Only certificate name needed
-        }
-      }
-    }
+    # ssl_certificates = {
+    #   "appgw-ssl-cert" = {
+    #     name              = "appgw-ssl-cert"
+    #     file_path         = null
+    #     password          = null
+    #     key_vault_details = {
+    #       cert_name           = "appgw-test-certificate"  # Only certificate name needed
+    #     }
+    #   }
+    # }
     gateway_ip_configuration = {
       name      = "GAC-FWAF-01-FWB-A-gwip"
       subnet_key = "appgw"
@@ -202,24 +202,24 @@ app_gateways = {
       priority                   = 100
     #   rewrite_rule_set_name      = "my-rewrite-rule-set"
     }
-      rule-https = {
-      name                       = "rule-https"
-      rule_type                  = "Basic"
-      http_listener_name         = "listener-https"
-      backend_address_pool_name  = "aks-pool"
-      backend_http_settings_name = "setting1"
-      priority                   = 101
-    }
+    #   rule-https = {
+    #   name                       = "rule-https"
+    #   rule_type                  = "Basic"
+    #   http_listener_name         = "listener-https"
+    #   backend_address_pool_name  = "aks-pool"
+    #   backend_http_settings_name = "setting1"
+    #   priority                   = 101
+    # }
     }
     frontend_ports = {
       "port01" = {
         name = "port01"
         port = 80
       }
-      "port443" = {
-        name = "port443"
-        port = 443
-      }
+      # "port443" = {
+      #   name = "port443"
+      #   port = 443
+      # }
     }
     http_listeners = {
       "listener1" = {
@@ -228,13 +228,13 @@ app_gateways = {
         host_name                      = null
         frontend_port_name             = "port01"
       }
-      "listener-https" = {
-        name                           = "listener-https"
-        frontend_ip_configuration_name = "GAC-FWAF-01-FWB-A-feip"
-        host_name                      = null
-        frontend_port_name             = "port443"
-        ssl_certificate_name           = "appgw-ssl-cert"
-      }
+      # "listener-https" = {
+      #   name                           = "listener-https"
+      #   frontend_ip_configuration_name = "GAC-FWAF-01-FWB-A-feip"
+      #   host_name                      = null
+      #   frontend_port_name             = "port443"
+      #   ssl_certificate_name           = "appgw-ssl-cert"
+      # }
     }
     waf_configuration = {
         enabled          = true
