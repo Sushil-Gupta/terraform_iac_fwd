@@ -329,7 +329,7 @@ azure_kubernetes_service = {
         max_pods             = 30
         vnet_subnet_key       = "aks"
         zones                = ["1"]
-        temporary_name_for_rotation = "default1"
+        # temporary_name_for_rotation = "default1"
       }
     node_pools  = {
        unp1 = {
@@ -344,7 +344,7 @@ azure_kubernetes_service = {
         max_pods             = 30
         vnet_subnet_key       = "aks"
         zones                = ["1"]
-        temporary_name_for_rotation = "linuxpldev1"
+        # temporary_name_for_rotation = "linuxpldev1"
       }
     }
     network_profile = {

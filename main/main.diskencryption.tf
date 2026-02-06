@@ -51,9 +51,9 @@ resource "azurerm_key_vault" "kv" {
   depends_on = [azurerm_resource_group.spoke_rg]
 }
 
-# Add access policy for SPN/user running Terraform (separate resource for proper timing)
+# Add access policy for SPN/user running Terraform 
 # This grants permissions to whoever is running terraform:
-# Uses dynamic object_id so no hardcoded values - works for any deployment!
+# Uses dynamic object_id so no hardcoded values
 resource "azurerm_key_vault_access_policy" "terraform_spn" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -142,6 +142,14 @@ resource "azurerm_key_vault_access_policy" "des_policy" {
 
   depends_on = [azurerm_disk_encryption_set.aks_des]
 }
+
+# # Wait for Key Vault access policy propagation (30 seconds)
+# # This prevents EncryptionScopeNotAvailable errors when AKS creates encrypted disks
+# resource "time_sleep" "wait_for_kv_propagation" {
+#   create_duration = "30s"
+  
+#   depends_on = [azurerm_key_vault_access_policy.des_policy]
+# }
 
 # Grant Managed Identity access to Key Vault for Application Gateway SSL certificates
 resource "azurerm_key_vault_access_policy" "appgw_managed_identity" {
