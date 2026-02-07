@@ -1,5 +1,5 @@
 subscription_id                   = "95642268-5116-484d-9b88-7dfce8c20ce4"
-spoke_resource_group_name         = "rg-fwd-qa"
+spoke_resource_group_name         = "rg-fwd"
 location                          = "westus3"
 app_name                          = "fwd"
 environment                       = "qa"
@@ -179,7 +179,7 @@ app_gateways = {
     #   }
     # }
     gateway_ip_configuration = {
-      name      = "fwd-appgw-qa-gwip"
+      name      = "fwd-appgw-qa-gwip" 
       subnet_key = "appgw"
     }
     backend_http_settings = {
@@ -329,7 +329,7 @@ azure_kubernetes_service = {
         max_pods             = 30
         vnet_subnet_key       = "aks"
         zones                = ["1"]
-        # temporary_name_for_rotation = "default1"
+        temporary_name_for_rotation = "default1"
       }
     node_pools  = {
        unp1 = {
@@ -344,7 +344,7 @@ azure_kubernetes_service = {
         max_pods             = 30
         vnet_subnet_key       = "aks"
         zones                = ["1"]
-        # temporary_name_for_rotation = "linuxpldev1"
+        temporary_name_for_rotation = "linuxpldev1"
       }
     }
     network_profile = {

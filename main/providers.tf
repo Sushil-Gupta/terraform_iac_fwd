@@ -23,7 +23,7 @@ terraform {
     # container_name       = "tfstate"
     # key                  = "dev-hw.terraform.tfstate"
     # use_azuread_auth = true
-    # # use_oidc = false
+    # # # use_oidc = false
   }
 
 }

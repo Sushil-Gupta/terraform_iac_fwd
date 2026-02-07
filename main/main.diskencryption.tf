@@ -1,26 +1,3 @@
-# ============================================================================
-# DISK ENCRYPTION CONFIGURATION - SANDBOX vs CUSTOMER DEPLOYMENT
-# ============================================================================
-# 
-# CURRENT MODE: SANDBOX TESTING (Creates all resources)
-# 
-# This file supports TWO deployment modes:
-# 
-# 1. SANDBOX TESTING (CURRENT):
-#    - Creates Key Vault, encryption key, DES, and access policies
-#    - Use this for local testing before customer deployment
-# 
-# 2. CUSTOMER DEPLOYMENT:
-#    - References existing Key Vault and DES created manually
-#    - Switch to data sources (commented section below)
-# 
-# TO SWITCH FROM SANDBOX TO CUSTOMER DEPLOYMENT:
-# Step 1: Comment out all resource blocks (lines ~35-85)
-# Step 2: Uncomment all data source blocks (lines ~90-110)
-# Step 3: Update outputs to reference data sources
-# 
-# ============================================================================
-
 # Get current client configuration (needed for tenant ID and object ID)
 data "azurerm_client_config" "current" {}
 
@@ -116,14 +93,14 @@ resource "azurerm_disk_encryption_set" "aks_des" {
   name                = "des-aks-${var.environment}-${var.app_name}"
   resource_group_name = var.spoke_resource_group_name
   location            = var.location
-  key_vault_key_id    = azurerm_key_vault_key.disk_encryption_key.id
+  key_vault_key_id    = azurerm_key_vault_key.disk_encryption_key.id  
 
   identity {
     type = "SystemAssigned"
   }
 
   tags = var.tags
-  depends_on = [azurerm_key_vault_key.disk_encryption_key]
+  depends_on = [azurerm_key_vault_key.disk_encryption_key]  # Updated dependency
 }
 
 # Grant DES managed identity access to Key Vault
@@ -141,32 +118,23 @@ resource "azurerm_key_vault_access_policy" "des_policy" {
   depends_on = [azurerm_disk_encryption_set.aks_des]
 }
 
-# # Wait for Key Vault access policy propagation (30 seconds)
-# # This prevents EncryptionScopeNotAvailable errors when AKS creates encrypted disks
-# resource "time_sleep" "wait_for_kv_propagation" {
-#   create_duration = "30s"
-  
-#   depends_on = [azurerm_key_vault_access_policy.des_policy]
+# resource "azurerm_key_vault_access_policy" "appgw_managed_identity" {
+#   key_vault_id = azurerm_key_vault.kv.id
+#   tenant_id    = data.azurerm_client_config.current.tenant_id
+#   object_id    = module.managed_identity.principal_id
+
+#   certificate_permissions = [
+#     "Get",
+#     "List"
+#   ]
+
+#   secret_permissions = [
+#     "Get",
+#     "List"
+#   ]
+
+#   depends_on = [module.managed_identity, azurerm_key_vault.kv]
 # }
-
-# Grant Managed Identity access to Key Vault for Application Gateway SSL certificates
-resource "azurerm_key_vault_access_policy" "appgw_managed_identity" {
-  key_vault_id = azurerm_key_vault.kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = module.managed_identity.principal_id
-
-  certificate_permissions = [
-    "Get",
-    "List"
-  ]
-
-  secret_permissions = [
-    "Get",
-    "List"
-  ]
-
-  depends_on = [module.managed_identity, azurerm_key_vault.kv]
-}
 
 # ============================================================================
 # CUSTOMER DEPLOYMENT CONFIGURATION (COMMENTED OUT FOR SANDBOX TESTING)
