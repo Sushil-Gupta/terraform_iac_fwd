@@ -52,12 +52,10 @@ resource "azurerm_key_vault" "kv" {
 }
 
 # Add access policy for SPN/user running Terraform 
-# This grants permissions to whoever is running terraform:
-# Uses dynamic object_id so no hardcoded values
-resource "azurerm_key_vault_access_policy" "terraform_spn" {
+resource "azurerm_key_vault_access_policy" "kv_access_policy" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id
+  object_id    = "67a92eb1-be29-418a-9bff-e86091539822"  # Principal Object ID
 
   key_permissions = [
     "Get",
@@ -109,7 +107,7 @@ resource "azurerm_key_vault_key" "disk_encryption_key" {
   tags = var.tags
   depends_on = [
     azurerm_key_vault.kv,
-    azurerm_key_vault_access_policy.terraform_spn  # Wait for SPN access policy to be applied
+    azurerm_key_vault_access_policy.kv_access_policy  # Wait for access policy to be applied
   ]
 }
 

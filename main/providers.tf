@@ -18,7 +18,12 @@ terraform {
   # Backend configuration for remote state storage in Azure
   # Values are provided via -backend-config flags in GitHub Actions
   backend "azurerm" {
-    
+    # resource_group_name  = "rg-tfstate-sushil-tfpoc"
+    # storage_account_name = "tfstate2189509"
+    # container_name       = "tfstate"
+    # key                  = "dev-hw.terraform.tfstate"
+    # use_azuread_auth = true
+    # # use_oidc = false
   }
 
 }
