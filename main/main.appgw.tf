@@ -68,7 +68,6 @@ module "application_gateway" {
   probe_configurations  = var.app_gateways.probe_configurations
   tags                  = merge(var.tags, var.app_gateways.tags)
   frontend_ip_configuration_public_name = var.app_gateways.frontend_ip_configuration_name
-  public_ip_resource_id                 = var.app_gateways.public_ip_resource_id
   zones                                 = var.app_gateways.zones
   # waf_configuration = var.app_gateways.waf_configuration
   managed_identities = {
