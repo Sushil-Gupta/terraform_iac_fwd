@@ -33,7 +33,7 @@ resource "azurerm_key_vault" "kv" {
 resource "azurerm_key_vault_access_policy" "kv_access_policy" {
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = "67a92eb1-be29-418a-9bff-e86091539822"  # Principal Object ID
+  object_id    = data.azurerm_client_config.current.object_id  # Use current client dynamically
 
   key_permissions = [
     "Get",
