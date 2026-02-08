@@ -393,7 +393,7 @@ azure_kubernetes_service = {
 # Key Vault for Disk Encryption (Customer will create this in Azure Portal)
 # Update these values after creating the Key Vault in Azure Portal
 key_vault = {
-  name                = "kv-fwd-qa-diskenc"  # Update with actual Key Vault name
+  name                = "kv-fwd-qa-diskenc-v2"  # Update with actual Key Vault name
   resource_group_name = "rg-fwd"           # Same as spoke RG
 }
 
