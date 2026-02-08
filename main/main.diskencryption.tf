@@ -13,7 +13,7 @@ resource "azurerm_key_vault" "kv" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 90
-  purge_protection_enabled   = false # Set to true if you want to prevent accidental deletion of the Key Vault and its contents
+  purge_protection_enabled   = true  # REQUIRED for AKS disk encryption with CMK
   
 
   # Enable Azure services to access the vault

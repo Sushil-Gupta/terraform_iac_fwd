@@ -1,5 +1,5 @@
 subscription_id                   = "95642268-5116-484d-9b88-7dfce8c20ce4"
-spoke_resource_group_name         = "rg-fwd"
+spoke_resource_group_name         = "fwd-rg-qa"
 location                          = "westus3"
 app_name                          = "fwd"
 environment                       = "qa"
@@ -22,7 +22,7 @@ tags = {
 }
 log_analytics_workspace = {
     name                = "law-fwd-qa"
-    resource_group_name = "rg-fwd-qa"
+    resource_group_name = "fwd-rg-qa"
 }
 
 
@@ -350,7 +350,7 @@ azure_kubernetes_service = {
     network_profile = {
         network_plugin       = "azure" 
         network_plugin_mode  = "overlay"
-        outbound_type        = "userDefinedRouting"
+        outbound_type        = "loadBalancer"  # Changed for sandbox testing (use userDefinedRouting for customer with hub/firewall)
         # service_cidr         = "10.0.97.192/26"
         # dns_service_ip       = "10.0.97.199"
     }
@@ -393,8 +393,8 @@ azure_kubernetes_service = {
 # Key Vault for Disk Encryption (Customer will create this in Azure Portal)
 # Update these values after creating the Key Vault in Azure Portal
 key_vault = {
-  name                = "kv-fwd-qa-diskenc-v2"  # Update with actual Key Vault name
-  resource_group_name = "rg-fwd"           # Same as spoke RG
+  name                = "kv-fwd-qa-diskenc-v3"  # Update with actual Key Vault name
+  resource_group_name = "fwd-rg-qa"           # Same as spoke RG
 }
 
 # Key name in Key Vault for Disk Encryption
@@ -403,7 +403,7 @@ disk_encryption_key_name = "aks-disk-encryption-key" # Update with actual Key na
 
 container_registry = {
   name = "fwdcontainerregistryqa"
-  resource_group_name = "rg-fwd"
+  resource_group_name = "fwd-rg-qa"
   sku = "Premium"
   private_endpoints = {
     "primary" = {
@@ -437,5 +437,5 @@ storage_accounts = {
 # Details: 4 vCores, 256 GB storage, General Purpose Gen5, Zone-redundant, West US 3
 sql_managed_instance = {
   name                = "forward-qa-sql"
-  resource_group_name = "rg-fwd"
+  resource_group_name = "fwd-rg-qa"
 }
