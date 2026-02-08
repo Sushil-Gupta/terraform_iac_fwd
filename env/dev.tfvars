@@ -394,7 +394,7 @@ azure_kubernetes_service = {
 # Update these values after creating the Key Vault in Azure Portal
 key_vault = {
   name                = "kv-fwd-qa-diskenc"  # Update with actual Key Vault name
-  resource_group_name = "rg-fwd-qa"           # Same as spoke RG
+  resource_group_name = "rg-fwd"           # Same as spoke RG
 }
 
 # Key name in Key Vault for Disk Encryption
@@ -403,7 +403,7 @@ disk_encryption_key_name = "aks-disk-encryption-key" # Update with actual Key na
 
 container_registry = {
   name = "fwdcontainerregistryqa"
-  resource_group_name = "rg-fwd-qa"
+  resource_group_name = "rg-fwd"
   sku = "Premium"
   private_endpoints = {
     "primary" = {
@@ -437,5 +437,5 @@ storage_accounts = {
 # Details: 4 vCores, 256 GB storage, General Purpose Gen5, Zone-redundant, West US 3
 sql_managed_instance = {
   name                = "forward-qa-sql"
-  resource_group_name = "rg-fwd-qa"
+  resource_group_name = "rg-fwd"
 }
