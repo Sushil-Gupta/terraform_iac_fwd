@@ -166,18 +166,21 @@ app_gateways = {
         name = "aks-pool"
       }
     }
-    # SSL Certificate Configuration - Using Key Vault
-    # Note: Key Vault name and resource group come from top-level key_vault variable
-    # ssl_certificates = {
-    #   "appgw-ssl-cert" = {
-    #     name              = "appgw-ssl-cert"
-    #     file_path         = null
-    #     password          = null
-    #     key_vault_details = {
-    #       cert_name           = "appgw-test-certificate"  # Only certificate name needed
-    #     }
-    #   }
-    # }
+    # ============================================================================
+    # SSL CERTIFICATE CONFIGURATION - SANDBOX TESTING
+    # Uses self-signed certificate from Key Vault for HTTPS testing
+    # Key Vault name and resource group come from top-level key_vault variable
+    # ============================================================================
+    ssl_certificates = {
+      "appgw-ssl-cert" = {
+        name              = "appgw-ssl-cert"
+        file_path         = null
+        password          = null
+        key_vault_details = {
+          cert_name = "appgw-test-certificate"  # Self-signed cert created in Key Vault
+        }
+      }
+    }
     gateway_ip_configuration = {
       name      = "fwd-appgw-qa-gwip" 
       subnet_key = "appgw"
@@ -192,49 +195,61 @@ app_gateways = {
         probe_name            = "Probe1"
       }
     }
+    # ============================================================================
+    # REQUEST ROUTING RULES - HTTP and HTTPS
+    # Both rules enabled to route traffic from listeners to backend pool
+    # ============================================================================
     request_routing_rules = {
-        rule-1 = {
-      name                       = "rule-1"
-      rule_type                  = "Basic"
-      http_listener_name         = "listener1"
-      backend_address_pool_name  = "aks-pool"
-      backend_http_settings_name = "setting1"
-      priority                   = 100
-    #   rewrite_rule_set_name      = "my-rewrite-rule-set"
+      rule-1 = {
+        name                       = "rule-1"
+        rule_type                  = "Basic"
+        http_listener_name         = "listener1"
+        backend_address_pool_name  = "aks-pool"
+        backend_http_settings_name = "setting1"
+        priority                   = 100
+      }
+      rule-https = {
+        name                       = "rule-https"
+        rule_type                  = "Basic"
+        http_listener_name         = "listener-https"
+        backend_address_pool_name  = "aks-pool"
+        backend_http_settings_name = "setting1"
+        priority                   = 101
+      }
     }
-    #   rule-https = {
-    #   name                       = "rule-https"
-    #   rule_type                  = "Basic"
-    #   http_listener_name         = "listener-https"
-    #   backend_address_pool_name  = "aks-pool"
-    #   backend_http_settings_name = "setting1"
-    #   priority                   = 101
-    # }
-    }
+    # ============================================================================
+    # FRONTEND PORTS - HTTP (80) and HTTPS (443)
+    # Both ports enabled for testing
+    # ============================================================================
     frontend_ports = {
       "port01" = {
         name = "port01"
         port = 80
       }
-      # "port443" = {
-      #   name = "port443"
-      #   port = 443
-      # }
+      "port443" = {
+        name = "port443"
+        port = 443
+      }
     }
+    # ============================================================================
+    # HTTP LISTENERS - HTTP (80) and HTTPS (443)
+    # Both listeners enabled for testing SSL certificate functionality
+    # ============================================================================
     http_listeners = {
       "listener1" = {
         name                           = "listener1"
         frontend_ip_configuration_name = "fwd-appgw-qa-feip"
         host_name                      = null
         frontend_port_name             = "port01"
+        ssl_certificate_name           = null
       }
-      # "listener-https" = {
-      #   name                           = "listener-https"
-      #   frontend_ip_configuration_name = "fwd-appgw-qa-feip"
-      #   host_name                      = null
-      #   frontend_port_name             = "port443"
-      #   ssl_certificate_name           = "appgw-ssl-cert"
-      # }
+      "listener-https" = {
+        name                           = "listener-https"
+        frontend_ip_configuration_name = "fwd-appgw-qa-feip"
+        host_name                      = null
+        frontend_port_name             = "port443"
+        ssl_certificate_name           = "appgw-ssl-cert"
+      }
     }
     waf_configuration = {
         enabled          = true
@@ -350,7 +365,7 @@ azure_kubernetes_service = {
     network_profile = {
         network_plugin       = "azure" 
         network_plugin_mode  = "overlay"
-        outbound_type        = "loadBalancer"  # Changed for sandbox testing (use userDefinedRouting for customer with hub/firewall)
+        outbound_type        = "userDefinedRouting"
         # service_cidr         = "10.0.97.192/26"
         # dns_service_ip       = "10.0.97.199"
     }

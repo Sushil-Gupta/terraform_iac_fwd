@@ -34,22 +34,32 @@ module "application_gateway_policy" {
     depends_on = [azurerm_resource_group.spoke_rg]
 }
 
-# data "azurerm_key_vault" "sslkv" {
- 
-#   for_each            = { for cert in var.app_gateways.ssl_certificates : cert.name => cert if(cert.key_vault_details != null)}
- 
-#   # Use the top-level key_vault variable for Key Vault name and resource group
-#   name                = var.key_vault.name
-#   resource_group_name = var.key_vault.resource_group_name
-# }
- 
-# data "azurerm_key_vault_certificate" "sslkv_cert" {
-#   for_each            = { for cert in var.app_gateways.ssl_certificates : cert.name => cert if(cert.key_vault_details != null)}
- 
-#   # Certificate name still comes from each certificate's configuration
-#   name         = each.value.key_vault_details.cert_name
-#   key_vault_id = data.azurerm_key_vault.sslkv[each.key].id
-# }
+# ============================================================================
+# SSL CERTIFICATE DATA SOURCES
+# Retrieves the self-signed certificate from Key Vault for Application Gateway
+# ============================================================================
+
+# Reference the Key Vault where SSL certificate is stored
+data "azurerm_key_vault" "sslkv" {
+  for_each            = { for cert in var.app_gateways.ssl_certificates : cert.name => cert if(cert.key_vault_details != null)}
+
+  # Use the top-level key_vault variable for Key Vault name and resource group
+  name                = var.key_vault.name
+  resource_group_name = var.key_vault.resource_group_name
+
+  depends_on = [azurerm_key_vault.kv]
+}
+
+# Retrieve SSL certificate from Key Vault
+data "azurerm_key_vault_certificate" "sslkv_cert" {
+  for_each = { for cert in var.app_gateways.ssl_certificates : cert.name => cert if(cert.key_vault_details != null)}
+
+  # Certificate name comes from each certificate's configuration
+  name         = each.value.key_vault_details.cert_name
+  key_vault_id = data.azurerm_key_vault.sslkv[each.key].id
+
+  depends_on = [azurerm_key_vault_certificate.appgw_ssl_cert]
+}
 
 
 
@@ -105,14 +115,20 @@ module "application_gateway" {
     }
   }
   request_routing_rules = var.app_gateways.request_routing_rules
-  # ssl_certificates = {
-  #   for sslcert in var.app_gateways.ssl_certificates : sslcert.name => {
-  #     name     = sslcert.name
-  #     data     = sslcert.file_path != null ? filebase64(sslcert.file_path) : null
-  #     key_vault_secret_id = sslcert.key_vault_details != null ? data.azurerm_key_vault_certificate.sslkv_cert[sslcert.name].secret_id : null
-  #     password = sslcert.key_vault_details == null ? sslcert.password : null
-  #   }
-  # }
+  
+  # ============================================================================
+  # SSL CERTIFICATES CONFIGURATION
+  # Maps SSL certificates from Key Vault to Application Gateway
+  # ============================================================================
+  ssl_certificates = {
+    for sslcert in var.app_gateways.ssl_certificates : sslcert.name => {
+      name                = sslcert.name
+      data                = sslcert.file_path != null ? filebase64(sslcert.file_path) : null
+      key_vault_secret_id = sslcert.key_vault_details != null ? data.azurerm_key_vault_certificate.sslkv_cert[sslcert.name].secret_id : null
+      password            = sslcert.key_vault_details == null ? sslcert.password : null
+    }
+  }
+
   url_path_map_configurations = var.app_gateways.url_path_map_configurations
   
   # lock = merge(local.lock, {

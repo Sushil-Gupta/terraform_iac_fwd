@@ -119,23 +119,89 @@ resource "azurerm_key_vault_access_policy" "des_policy" {
   depends_on = [azurerm_disk_encryption_set.aks_des]
 }
 
-# resource "azurerm_key_vault_access_policy" "appgw_managed_identity" {
-#   key_vault_id = azurerm_key_vault.kv.id
-#   tenant_id    = data.azurerm_client_config.current.tenant_id
-#   object_id    = module.managed_identity.principal_id
+# ============================================================================
+# SSL CERTIFICATE TESTING CONFIGURATION
+# Creates a self-signed certificate in Key Vault for testing HTTPS with App Gateway
+# ============================================================================
 
-#   certificate_permissions = [
-#     "Get",
-#     "List"
-#   ]
+# Self-signed certificate for Application Gateway SSL testing
+# This certificate is for SANDBOX TESTING ONLY - use CA-signed certificates in production
+resource "azurerm_key_vault_certificate" "appgw_ssl_cert" {
+  name         = "appgw-test-certificate"
+  key_vault_id = azurerm_key_vault.kv.id
 
-#   secret_permissions = [
-#     "Get",
-#     "List"
-#   ]
+  certificate_policy {
+    issuer_parameters {
+      name = "Self"  # Self-signed certificate
+    }
 
-#   depends_on = [module.managed_identity, azurerm_key_vault.kv]
-# }
+    key_properties {
+      exportable = true
+      key_size   = 2048
+      key_type   = "RSA"
+      reuse_key  = true
+    }
+
+    lifetime_action {
+      action {
+        action_type = "AutoRenew"
+      }
+
+      trigger {
+        days_before_expiry = 30
+      }
+    }
+
+    secret_properties {
+      content_type = "application/x-pkcs12"
+    }
+
+    x509_certificate_properties {
+      # Server Authentication OID
+      extended_key_usage = ["1.3.6.1.5.5.7.3.1"]
+
+      key_usage = [
+        "cRLSign",
+        "dataEncipherment",
+        "digitalSignature",
+        "keyAgreement",
+        "keyCertSign",
+        "keyEncipherment",
+      ]
+
+      # Common Name - using wildcard for testing flexibility
+      subject            = "CN=appgw-test.local"
+      validity_in_months = 12
+    }
+  }
+
+  tags = var.tags
+
+  depends_on = [
+    azurerm_key_vault.kv,
+    azurerm_key_vault_access_policy.kv_access_policy
+  ]
+}
+
+# Grant Application Gateway managed identity access to Key Vault for SSL certificates
+# Required for App Gateway to retrieve SSL certificates from Key Vault
+resource "azurerm_key_vault_access_policy" "appgw_managed_identity" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = module.managed_identity.principal_id
+
+  certificate_permissions = [
+    "Get",
+    "List"
+  ]
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
+
+  depends_on = [module.managed_identity, azurerm_key_vault.kv]
+}
 
 # ============================================================================
 # CUSTOMER DEPLOYMENT CONFIGURATION (COMMENTED OUT FOR SANDBOX TESTING)
