@@ -1,3 +1,13 @@
+# ============================================================================
+# IMPORT BLOCK - Import existing Public IP into Terraform state
+# This is needed because the Public IP exists in Azure but not in state
+# Remove this block after successful import (next terraform apply)
+# ============================================================================
+import {
+  to = module.application_gateway.azurerm_public_ip.this[0]
+  id = "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/resourceGroups/fwd-rg-qa/providers/Microsoft.Network/publicIPAddresses/pip-fwd-appgw-qa"
+}
+
 # module "app_gateway_public_ips" {
 #   for_each = var.app_gateway_pips
 #   source                  = "Azure/avm-res-network-publicipaddress/azurerm"
